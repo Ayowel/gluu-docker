@@ -21,6 +21,8 @@ gather_ip() {
     case "${unameOut}" in
         Linux*)     machine=Linux;;
         Darwin*)    machine=Mac;;
+        CYGWIN*)    machine=CygWin;;
+        MINGW*)     machine=MinGW;;
         *)          machine="UNKNOWN:${unameOut}"
     esac
     echo "Host is detected as ${machine}"
@@ -29,6 +31,12 @@ gather_ip() {
         HOST_IP=$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     elif [[ $machine == Mac ]]; then
         HOST_IP=$(route get default | grep gateway | awk '{print $2}')
+    elif [[ $machine == CygWin ]]; then
+        HOST_IP=$(curl -s http://icanhazip.com/)
+    elif [[ $machine == MinGW ]]; then
+        echo "The MinGW environment is known to cause problems with path expansion in docker." >&2
+        echo "If you do encounter any, try to run the script with Cygwin instead." >&2
+        HOST_IP=$(curl -s http://icanhazip.com/)
     else
         echo "Cannot determine IP address."
         read -p "Please input the hosts external IP Address: " HOST_IP
